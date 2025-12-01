@@ -42,13 +42,13 @@ async function run() {
             const id = req.params.id;
             const updateProperty = req.body;
             const query = { _id: new ObjectId(id) }
-            const update ={
-                $set:{
+            const update = {
+                $set: {
                     name: updateProperty.name,
                     price: updateProperty.price
                 }
             }
-            const result = await propertiesCollection.updateOne(query,update)
+            const result = await propertiesCollection.updateOne(query, update)
             res.send(result)
         })
 
@@ -60,8 +60,21 @@ async function run() {
             const result = await propertiesCollection.deleteOne(query)
             res.send(result)
         })
+        // get property
+
+        app.get('/properties', async (req, res) => {
+            const cursor = propertiesCollection.find().sort({ created_at: -1 }).limit(6);
+            const result = await cursor.toArray();
+            res.send(result)
+        })
 
 
+        app.get('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await propertiesCollection.findOne(query);
+            res.send(result);
+        })
 
         await client.db("admin").command({ ping: 1 });
         console.log("pinged your deployment.You successfully connected to MongoDB!")
