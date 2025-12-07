@@ -34,9 +34,23 @@ async function run() {
         //   create products
         app.post('/properties', async (req, res) => {
             const newProperty = req.body;
+
+            // Auto-set created date
+            property.created_at = new Date();
+
             const result = await propertiesCollection.insertOne(newProperty);
             res.send(result);
         })
+
+
+        // get 6 property for home page
+        app.get('/properties/home', async (req, res) => {
+            const result = await propertiesCollection.find().sort({ created_at: -1 }).limit(6).toArray();
+            res.send(result);
+        })
+
+
+
         // update property
         app.patch('/properties/:id', async (req, res) => {
             const id = req.params.id;
@@ -44,8 +58,13 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const update = {
                 $set: {
-                    name: updateProperty.name,
-                    price: updateProperty.price
+                    title: updateProperty.title,
+                    description: updateProperty.description,
+                    category: updateProperty.category,
+                    price: updateProperty.price,
+                    location: updateProperty.location,
+                    image: updateProperty.image
+
                 }
             }
             const result = await propertiesCollection.updateOne(query, update)
@@ -60,15 +79,25 @@ async function run() {
             const result = await propertiesCollection.deleteOne(query)
             res.send(result)
         })
-        // get property
+        // get all property
 
         app.get('/properties', async (req, res) => {
-            const cursor = propertiesCollection.find().sort({ created_at: -1 }).limit(6);
+            const userEmail = req.query.userEmail;
+            let filter = {};
+
+            if (userEmail) {
+                filter.userEmail = userEmail;
+            }
+
+            const cursor = propertiesCollection
+                .find(filter)
+                .sort({ created_at: -1 });
+
             const result = await cursor.toArray();
-            res.send(result)
-        })
+            res.send(result);
+        });
 
-
+        // get a single property
         app.get('/properties/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
