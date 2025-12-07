@@ -31,15 +31,29 @@ async function run() {
 
         const db = client.db('home_nest');
         const propertiesCollection = db.collection('properties');
-        //   create products
+        //   create properties
         app.post('/properties', async (req, res) => {
             const newProperty = req.body;
 
-            // Auto-set created date
-            property.created_at = new Date();
+            newProperty.created_at = new Date();
 
             const result = await propertiesCollection.insertOne(newProperty);
             res.send(result);
+        })
+
+        // reviews
+
+        app.post('/reviews',async(req,res)=>{
+            try{
+                const review =req.body;
+                review.created_at = new Date();
+                const result = await db.collection('reviews').insertOne(review);
+                res.send(result);
+            }
+            catch(err){
+                console.log(err);
+                res.status(500).send({error: 'Failed to add review'})
+            }
         })
 
 
@@ -55,6 +69,7 @@ async function run() {
         app.patch('/properties/:id', async (req, res) => {
             const id = req.params.id;
             const updateProperty = req.body;
+
             const query = { _id: new ObjectId(id) }
             const update = {
                 $set: {
@@ -83,6 +98,7 @@ async function run() {
 
         app.get('/properties', async (req, res) => {
             const userEmail = req.query.userEmail;
+
             let filter = {};
 
             if (userEmail) {
