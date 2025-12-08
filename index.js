@@ -41,20 +41,50 @@ async function run() {
             res.send(result);
         })
 
-        // reviews
+        //create reviews
 
-        app.post('/reviews',async(req,res)=>{
-            try{
-                const review =req.body;
+        app.post('/reviews', async (req, res) => {
+            try {
+                const review = req.body;
                 review.created_at = new Date();
                 const result = await db.collection('reviews').insertOne(review);
                 res.send(result);
             }
-            catch(err){
+            catch (err) {
                 console.log(err);
-                res.status(500).send({error: 'Failed to add review'})
+                res.status(500).send({ error: 'Failed to add review' })
             }
         })
+        // Get reviews for a property
+        app.get('/reviews/:propertyId', async (req, res) => {
+            try {
+                const propertyId = req.params.propertyId;
+                const reviews = await db.collection('reviews')
+                    .find({ propertyId })
+                    .sort({ created_at: -1 })
+                    .toArray();
+                res.send(reviews);
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({ error: 'Failed to fetch reviews' });
+            }
+        });
+
+        //Get reviews by a user 
+
+        app.get('/my-reviews/:userEmail', async (req, res) => {
+            try {
+                const userEmail = req.params.userEmail;
+                const reviews = await db.collection('reviews')
+                    .find({ userEmail })
+                    .sort({ created_at: -1 })
+                    .toArray();
+                res.send(reviews);
+            } catch (err) {
+                console.error(err);
+                res.status(500).send({ error: 'Failed to fetch user reviews' });
+            }
+        });
 
 
         // get 6 property for home page
