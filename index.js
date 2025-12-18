@@ -20,14 +20,12 @@ const client = new MongoClient(uri, {
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('home nest is running')
-})
+
 
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
 
         const db = client.db('home_nest');
         const propertiesCollection = db.collection('properties');
@@ -159,6 +157,10 @@ async function run() {
     }
 }
 run().catch(console.dir)
+
+app.get('/', (req, res) => {
+    res.send('home nest is running')
+})
 
 app.listen(port, () => {
     console.log(`home nest is running on port: ${port}`)
